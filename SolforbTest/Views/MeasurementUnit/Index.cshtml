@@ -1,0 +1,47 @@
+@model IEnumerable<SolforbTest.Domain.MeasurementUnit>
+@{
+    ViewData["Title"] = "Список единиц измерения";
+}
+<h2>Список единиц измерения</h2>
+<a class="btn btn-primary mb-3" asp-action="Create">Добавить единицу</a>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Наименование</th>
+            <th>Статус</th>
+            <th>Действия</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.Id</td>
+            <td>@item.Name</td>
+            <td>
+                @if (item.IsActive)
+                {
+                    <span class="badge bg-success">Активная</span>
+                }
+                else
+                {
+                    <span class="badge bg-secondary">В архиве</span>
+                }
+            </td>
+            <td>
+                <a class="btn btn-sm btn-warning" asp-action="Edit" asp-route-id="@item.Id">Редактировать</a>
+                <form asp-action="Delete" asp-route-id="@item.Id" method="post" style="display:inline">
+                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Удалить единицу?');">Удалить</button>
+                </form>
+                <form asp-action="ChangeState" asp-route-id="@item.Id" method="post" style="display:inline">
+                    <input type="hidden" name="isActive" value="@(item.IsActive ? "false" : "true")" />
+                    <button type="submit" class="btn btn-sm btn-secondary ms-1">
+                        @(item.IsActive ? "В архив" : "Активировать")
+                    </button>
+                </form>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

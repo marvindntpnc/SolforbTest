@@ -1,0 +1,18 @@
+@model SolforbTest.Domain.MeasurementUnit
+@{
+    ViewData["Title"] = "Добавить единицу измерения";
+}
+<h2>Добавить единицу измерения</h2>
+<form asp-action="Create" method="post">
+    <div class="mb-3">
+        <label asp-for="Name" class="form-label">Наименование</label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+    <div class="form-check mb-3">
+        <input asp-for="IsActive" class="form-check-input" checked />
+        <label asp-for="IsActive" class="form-check-label">Активная</label>
+    </div>
+    <button type="submit" class="btn btn-success">Сохранить</button>
+    <a asp-action="Index" class="btn btn-secondary">Отмена</a>
+</form>

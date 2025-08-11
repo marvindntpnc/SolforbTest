@@ -14,6 +14,9 @@ builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<IResourceRepository, ResourceRepository>();
 builder.Services.AddScoped<IResourceFactory, SolforbTest.Factories.ResourceFactory>();
 builder.Services.AddScoped<ResourceService>();
+builder.Services.AddScoped<IMeasurementUnitRepository, MeasurementUnitRepository>();
+builder.Services.AddScoped<IMeasurementUnitFactory, SolforbTest.Factories.MeasurementUnitFactory>();
+builder.Services.AddScoped<MeasurementUnitService>();
 
 
 builder.Services.AddControllersWithViews();

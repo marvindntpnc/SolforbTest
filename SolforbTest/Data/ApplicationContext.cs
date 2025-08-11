@@ -8,5 +8,6 @@ namespace SolforbTest.Data
         public ApplicationContext(DbContextOptions<ApplicationContext> options) : base(options) { }
 
         public DbSet<Resource> Resources { get; set; }
+        public DbSet<MeasurementUnit> MeasurementUnits { get; set; }
     }
 }
