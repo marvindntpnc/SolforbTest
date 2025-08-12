@@ -1,19 +1,103 @@
-@model SolforbTest.Domain.ReceiptDocument
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model SolforbTest.ViewModels.ReceiptDocumentViewModel
 @{
     ViewData["Title"] = "Добавить документ поступления";
 }
 <h2>Добавить документ поступления</h2>
 <form asp-action="Create" method="post">
-    <div class="mb-3">
-        <label asp-for="Number" class="form-label">Номер документа</label>
-        <input asp-for="Number" class="form-control" />
-        <span asp-validation-for="Number" class="text-danger"></span>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="mb-3">
+                <label asp-for="Number" class="form-label"></label>
+                <input asp-for="Number" class="form-control" />
+                <span asp-validation-for="Number" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="mb-3">
+                <label asp-for="Date" class="form-label"></label>
+                <input asp-for="Date" type="date" class="form-control" />
+                <span asp-validation-for="Date" class="text-danger"></span>
+            </div>
+        </div>
     </div>
-    <div class="mb-3">
-        <label asp-for="Date" class="form-label">Дата</label>
-        <input asp-for="Date" type="date" class="form-control" />
-        <span asp-validation-for="Date" class="text-danger"></span>
+
+    <h4>Ресурсы документа</h4>
+    <table class="table" id="lines-table">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Ресурс</th>
+                <th>Единица измерения</th>
+                <th>Количество</th>
+            </tr>
+        </thead>
+        <tbody>
+        @for (int i = 0; i < Model.Lines.Count; i++)
+        {
+            <tr>
+                <td>
+                    <button type="button" class="btn btn-sm btn-danger" onclick="removeRow(this)">-</button>
+                </td>
+                <td>
+                    <select class="form-select" asp-for="Lines[@i].ResourceId" asp-items="Model.ResourceOptions"></select>
+                </td>
+                <td>
+                    <select class="form-select" asp-for="Lines[@i].MeasurementUnitId" asp-items="Model.MeasurementUnitOptions"></select>
+                </td>
+                <td>
+                    <input class="form-control" asp-for="Lines[@i].Quantity" />
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+    <button type="button" class="btn btn-outline-primary" onclick="addRow()">Добавить строку</button>
+
+    <div class="mt-3">
+        <button type="submit" class="btn btn-success">Сохранить</button>
+        <a asp-action="Index" class="btn btn-secondary">Отмена</a>
     </div>
-    <button type="submit" class="btn btn-success">Сохранить</button>
-    <a asp-action="Index" class="btn btn-secondary">Отмена</a>
 </form>
+
+@section Scripts {
+    <script>
+        let lineIndex = @Model.Lines.Count;
+        function addRow() {
+            const tbody = document.querySelector('#lines-table tbody');
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><button type="button" class="btn btn-sm btn-danger" onclick="removeRow(this)">-</button></td>
+                <td>
+                    <select name="Lines[${lineIndex}].ResourceId" class="form-select">
+                        ${getOptions(@Html.Raw(Json.Serialize(Model.ResourceOptions)))}
+                    </select>
+                </td>
+                <td>
+                    <select name="Lines[${lineIndex}].MeasurementUnitId" class="form-select">
+                        ${getOptions(@Html.Raw(Json.Serialize(Model.MeasurementUnitOptions)))}
+                    </select>
+                </td>
+                <td>
+                    <input name="Lines[${lineIndex}].Quantity" class="form-control" type="number" value="1" min="1" />
+                </td>`;
+            tbody.appendChild(tr);
+            lineIndex++;
+        }
+        function removeRow(btn) {
+            const tr = btn.closest('tr');
+            tr.remove();
+        }
+        function getOptions(options) {
+            try {
+                const data = options;
+                return data.map(o => {
+                    const value = o.value ?? o.Value;
+                    const text = o.text ?? o.Text;
+                    const selected = o.selected ?? o.Selected;
+                    return `<option value="${value}" ${selected ? 'selected' : ''}>${text}</option>`;
+                }).join('');
+            } catch { return ''; }
+        }
+    </script>
+}

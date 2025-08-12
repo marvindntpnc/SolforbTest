@@ -5,13 +5,23 @@ namespace SolforbTest.Factories
 {
     public class ReceiptDocumentFactory : IReceiptDocumentFactory
     {
-        public ReceiptDocument Create(string number, DateTime date)
+        public ReceiptDocument Create(string number, DateTime date, IEnumerable<ReceiptResource> resources = null)
         {
-            return new ReceiptDocument
+            var document = new ReceiptDocument
             {
                 Number = number,
                 Date = date
             };
+
+            if (resources != null)
+            {
+                foreach (var resource in resources)
+                {
+                    document.ReceiptResources.Add(resource);
+                }
+            }
+
+            return document;
         }
     }
 }

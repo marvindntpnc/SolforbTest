@@ -10,5 +10,6 @@ namespace SolforbTest.Data
         public DbSet<Resource> Resources { get; set; }
         public DbSet<MeasurementUnit> MeasurementUnits { get; set; }
         public DbSet<ReceiptDocument> ReceiptDocuments { get; set; }
+        public DbSet<ReceiptResource> ReceiptResources { get; set; }
     }
 }

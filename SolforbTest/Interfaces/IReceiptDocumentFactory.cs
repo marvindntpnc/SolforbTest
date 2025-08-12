@@ -4,6 +4,6 @@ namespace SolforbTest.Interfaces
 {
     public interface IReceiptDocumentFactory
     {
-        ReceiptDocument Create(string number, DateTime date);
+        ReceiptDocument Create(string number, DateTime date, IEnumerable<ReceiptResource> resources = null);
     }
 }

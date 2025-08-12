@@ -1,10 +1,11 @@
+@using Microsoft.AspNetCore.Mvc.TagHelpers
 @model IEnumerable<SolforbTest.Domain.ReceiptDocument>
 @{
     ViewData["Title"] = "Список документов поступления";
 }
 <h2>Список документов поступления</h2>
 <a class="btn btn-primary mb-3" asp-action="Create">Добавить документ</a>
-<table class="table table-striped">
+<table class="table table-striped align-middle">
     <thead>
         <tr>
             <th>Id</th>
@@ -27,6 +28,33 @@
                 </form>
             </td>
         </tr>
+        if (item.ReceiptResources != null && item.ReceiptResources.Any())
+        {
+            <tr>
+                <td></td>
+                <td colspan="3">
+                    <table class="table table-sm mb-4">
+                        <thead>
+                            <tr>
+                                <th>Ресурс</th>
+                                <th>Ед. изм.</th>
+                                <th class="text-end">Кол-во</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var line in item.ReceiptResources)
+                        {
+                            <tr>
+                                <td>@(line.Resource?.Name ?? line.ResourceId.ToString())</td>
+                                <td>@(line.MeasurementUnit?.Name ?? line.MeasurementUnitId.ToString())</td>
+                                <td class="text-end">@line.Quantity</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+        }
     }
     </tbody>
 </table>

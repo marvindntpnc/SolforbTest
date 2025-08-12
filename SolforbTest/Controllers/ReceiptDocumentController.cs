@@ -1,65 +1,122 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using SolforbTest.Domain;
 using SolforbTest.Services;
+using SolforbTest.ViewModels;
+using System.Linq;
 
 namespace SolforbTest.Controllers
 {
     public class ReceiptDocumentController : Controller
     {
         private readonly ReceiptDocumentService _service;
+        private readonly ResourceService _resourceService;
+        private readonly MeasurementUnitService _unitService;
 
-        public ReceiptDocumentController(ReceiptDocumentService service)
+        public ReceiptDocumentController(ReceiptDocumentService service, ResourceService resourceService, MeasurementUnitService unitService)
         {
             _service = service;
+            _resourceService = resourceService;
+            _unitService = unitService;
         }
 
         public IActionResult Index()
         {
-            var documents = _service.GetAll();
+            var documents = _service.GetAllWithResources();
             return View(documents);
+        }
+
+        private void PopulateOptions(ReceiptDocumentViewModel vm)
+        {
+            vm.ResourceOptions = _resourceService.GetAll().Select(r => new SelectListItem { Value = r.Id.ToString(), Text = r.Name }).ToList();
+            vm.MeasurementUnitOptions = _unitService.GetAll().Select(u => new SelectListItem { Value = u.Id.ToString(), Text = u.Name }).ToList();
         }
 
         public IActionResult Create()
         {
-            return View();
+            var vm = new ReceiptDocumentViewModel
+            {
+                Lines = new List<ReceiptResourceRowViewModel> { new ReceiptResourceRowViewModel() }
+            };
+            PopulateOptions(vm);
+            return View(vm);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(string number, DateTime date)
+        public IActionResult Create(ReceiptDocumentViewModel vm)
         {
-            if (string.IsNullOrWhiteSpace(number))
+            if (!ModelState.IsValid)
             {
-                ModelState.AddModelError("Number", "Номер документа обязателен");
-                return View();
+                PopulateOptions(vm);
+                return View(vm);
             }
-            _service.Add(number, date);
+
+            var lines = (vm.Lines ?? new List<ReceiptResourceRowViewModel>())
+                .Where(l => l.ResourceId.HasValue && l.MeasurementUnitId.HasValue)
+                .Select(l => new ReceiptResource
+                {
+                    ResourceId = l.ResourceId!.Value,
+                    MeasurementUnitId = l.MeasurementUnitId!.Value,
+                    Quantity = l.Quantity
+                }).ToList();
+
+            _service.Add(vm.Number, vm.Date, lines);
             return RedirectToAction("Index");
         }
 
         public IActionResult Edit(int id)
         {
-            var document = _service.GetById(id);
+            var document = _service.GetWithResources(id);
             if (document == null)
                 return NotFound();
-            return View(document);
+
+            var vm = new ReceiptDocumentViewModel
+            {
+                Id = document.Id,
+                Number = document.Number,
+                Date = document.Date,
+                Lines = document.ReceiptResources.Select(rr => new ReceiptResourceRowViewModel
+                {
+                    Id = rr.Id,
+                    ResourceId = rr.ResourceId,
+                    MeasurementUnitId = rr.MeasurementUnitId,
+                    Quantity = (int)rr.Quantity
+                }).ToList()
+            };
+            if (!vm.Lines.Any()) vm.Lines.Add(new ReceiptResourceRowViewModel());
+            PopulateOptions(vm);
+            return View(vm);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(int id, string number, DateTime date)
+        public IActionResult Edit(ReceiptDocumentViewModel vm)
         {
-            var document = _service.GetById(id);
-            if (document == null)
-                return NotFound();
-            if (string.IsNullOrWhiteSpace(number))
+            if (!ModelState.IsValid || vm.Id == null)
             {
-                ModelState.AddModelError("Number", "Номер документа обязателен");
-                return View(document);
+                PopulateOptions(vm);
+                return View(vm);
             }
-            document.Number = number;
-            document.Date = date;
-            _service.Update(document);
+
+            var document = new ReceiptDocument
+            {
+                Id = vm.Id.Value,
+                Number = vm.Number,
+                Date = vm.Date
+            };
+
+            var lines = (vm.Lines ?? new List<ReceiptResourceRowViewModel>())
+                .Where(l => l.ResourceId.HasValue && l.MeasurementUnitId.HasValue)
+                .Select(l => new ReceiptResource
+                {
+                    Id = l.Id ?? 0,
+                    ResourceId = l.ResourceId!.Value,
+                    MeasurementUnitId = l.MeasurementUnitId!.Value,
+                    Quantity = l.Quantity
+                }).ToList();
+
+            _service.UpdateWithResources(document, lines);
             return RedirectToAction("Index");
         }
 
