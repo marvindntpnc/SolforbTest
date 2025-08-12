@@ -11,13 +11,10 @@ builder.Services.AddDbContext<ApplicationContext>(options =>
     options.UseSqlServer(connection));
 
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-builder.Services.AddScoped<IResourceRepository, ResourceRepository>();
 builder.Services.AddScoped<IResourceFactory, SolforbTest.Factories.ResourceFactory>();
 builder.Services.AddScoped<ResourceService>();
-builder.Services.AddScoped<IMeasurementUnitRepository, MeasurementUnitRepository>();
 builder.Services.AddScoped<IMeasurementUnitFactory, SolforbTest.Factories.MeasurementUnitFactory>();
 builder.Services.AddScoped<MeasurementUnitService>();
-builder.Services.AddScoped<IReceiptDocumentRepository, ReceiptDocumentRepository>();
 builder.Services.AddScoped<IReceiptDocumentFactory, SolforbTest.Factories.ReceiptDocumentFactory>();
 builder.Services.AddScoped<ReceiptDocumentService>();
 
@@ -43,7 +40,7 @@ app.MapStaticAssets();
 
 app.MapControllerRoute(
         name: "default",
-        pattern: "{controller=Home}/{action=Index}/{id?}")
+        pattern: "{controller=ReceiptDocument}/{action=Index}/{id?}")
     .WithStaticAssets();
 
 

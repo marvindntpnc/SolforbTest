@@ -1,10 +1,55 @@
 @using Microsoft.AspNetCore.Mvc.TagHelpers
-@model IEnumerable<SolforbTest.Domain.ReceiptDocument>
+@model SolforbTest.ViewModels.ReceiptDocumentIndexViewModel
 @{
     ViewData["Title"] = "Список документов поступления";
 }
 <h2>Список документов поступления</h2>
-<a class="btn btn-primary mb-3" asp-action="Create">Добавить документ</a>
+
+<form method="get" class="card card-body mb-3">
+    <div class="row g-3 align-items-end">
+        <div class="col-md-2">
+            <label class="form-label">Дата с</label>
+            <input type="date" name="dateFrom" value="@Model.DateFrom?.ToString("yyyy-MM-dd")" class="form-control" />
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Дата по</label>
+            <input type="date" name="dateTo" value="@Model.DateTo?.ToString("yyyy-MM-dd")" class="form-control" />
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Номера документов</label>
+            <select id="numbers" name="numbers" class="form-select js-multi" multiple size="5">
+                @foreach (var n in Model.NumberOptions)
+                {
+                    <option value="@n.Value" selected="@(n.Selected)">@n.Text</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Ресурсы</label>
+            <select id="resources" name="resources" class="form-select js-multi" multiple size="5">
+                @foreach (var r in Model.ResourceOptions)
+                {
+                    <option value="@r.Value" selected="@(r.Selected)">@r.Text</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Ед. изм.</label>
+            <select id="units" name="units" class="form-select js-multi" multiple size="5">
+                @foreach (var u in Model.MeasurementUnitOptions)
+                {
+                    <option value="@u.Value" selected="@(u.Selected)">@u.Text</option>
+                }
+            </select>
+        </div>
+    </div>
+    <div class="mt-3 d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Фильтровать</button>
+        <a asp-action="Index" class="btn btn-secondary">Сбросить</a>
+        <a class="btn btn-success ms-auto" asp-action="Create">Добавить документ</a>
+    </div>
+</form>
+
 <table class="table table-striped align-middle">
     <thead>
         <tr>
@@ -15,7 +60,7 @@
         </tr>
     </thead>
     <tbody>
-    @foreach (var item in Model)
+    @foreach (var item in Model.Documents)
     {
         <tr>
             <td>@item.Id</td>
@@ -58,3 +103,11 @@
     }
     </tbody>
 </table>
+
+@section Scripts {
+<script>
+    $(function() {
+        $('.js-multi').select2({ width: '100%' });
+    });
+</script>
+}

@@ -20,16 +20,32 @@ namespace SolforbTest.Controllers
             _unitService = unitService;
         }
 
-        public IActionResult Index()
+        [HttpGet]
+        public IActionResult Index(DateTime? dateFrom, DateTime? dateTo, List<string> numbers, List<int> resources, List<int> units)
         {
-            var documents = _service.GetAllWithResources();
-            return View(documents);
+            var vm = new ReceiptDocumentIndexViewModel
+            {
+                DateFrom = dateFrom,
+                DateTo = dateTo,
+                SelectedNumbers = numbers ?? new List<string>(),
+                SelectedResourceIds = resources ?? new List<int>(),
+                SelectedMeasurementUnitIds = units ?? new List<int>()
+            };
+
+            // Опции должны быть независимы от периода
+            vm.NumberOptions = _service.GetAllNumbers().Select(n => new SelectListItem { Value = n, Text = n, Selected = vm.SelectedNumbers.Contains(n) }).ToList();
+            vm.ResourceOptions = _service.GetAllResources().Select(r => new SelectListItem { Value = r.Id.ToString(), Text = r.Name, Selected = vm.SelectedResourceIds.Contains(r.Id) }).ToList();
+            vm.MeasurementUnitOptions = _service.GetAllMeasurementUnits().Select(u => new SelectListItem { Value = u.Id.ToString(), Text = u.Name, Selected = vm.SelectedMeasurementUnitIds.Contains(u.Id) }).ToList();
+
+            vm.Documents = _service.GetFiltered(dateFrom, dateTo, vm.SelectedNumbers, vm.SelectedResourceIds, vm.SelectedMeasurementUnitIds);
+
+            return View(vm);
         }
 
         private void PopulateOptions(ReceiptDocumentViewModel vm)
         {
-            vm.ResourceOptions = _resourceService.GetAll().Select(r => new SelectListItem { Value = r.Id.ToString(), Text = r.Name }).ToList();
-            vm.MeasurementUnitOptions = _unitService.GetAll().Select(u => new SelectListItem { Value = u.Id.ToString(), Text = u.Name }).ToList();
+            vm.ResourceOptions = _resourceService.GetActive().Select(r => new SelectListItem { Value = r.Id.ToString(), Text = r.Name }).ToList();
+            vm.MeasurementUnitOptions = _unitService.GetActive().Select(u => new SelectListItem { Value = u.Id.ToString(), Text = u.Name }).ToList();
         }
 
         public IActionResult Create()
@@ -61,7 +77,16 @@ namespace SolforbTest.Controllers
                     Quantity = l.Quantity
                 }).ToList();
 
-            _service.Add(vm.Number, vm.Date, lines);
+            try
+            {
+                _service.Add(vm.Number, vm.Date, lines);
+            }
+            catch (InvalidOperationException ex)
+            {
+                ModelState.AddModelError("Number", ex.Message);
+                PopulateOptions(vm);
+                return View(vm);
+            }
             return RedirectToAction("Index");
         }
 
@@ -116,7 +141,16 @@ namespace SolforbTest.Controllers
                     Quantity = l.Quantity
                 }).ToList();
 
-            _service.UpdateWithResources(document, lines);
+            try
+            {
+                _service.UpdateWithResources(document, lines);
+            }
+            catch (InvalidOperationException ex)
+            {
+                ModelState.AddModelError("Number", ex.Message);
+                PopulateOptions(vm);
+                return View(vm);
+            }
             return RedirectToAction("Index");
         }
 

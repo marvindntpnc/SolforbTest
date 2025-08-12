@@ -33,7 +33,15 @@ namespace SolforbTest.Controllers
                 ModelState.AddModelError("Name", "Наименование обязательно");
                 return View();
             }
-            _service.Add(name, isActive);
+            try
+            {
+                _service.Add(name, isActive);
+            }
+            catch (InvalidOperationException ex)
+            {
+                ModelState.AddModelError("Name", ex.Message);
+                return View();
+            }
             return RedirectToAction("Index");
         }
 
@@ -59,7 +67,15 @@ namespace SolforbTest.Controllers
             }
             unit.Name = name;
             unit.IsActive = isActive;
-            _service.Update(unit);
+            try
+            {
+                _service.Update(unit);
+            }
+            catch (InvalidOperationException ex)
+            {
+                ModelState.AddModelError("Name", ex.Message);
+                return View(unit);
+            }
             return RedirectToAction("Index");
         }
 
@@ -67,7 +83,14 @@ namespace SolforbTest.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Delete(int id)
         {
-            _service.Delete(id);
+            try
+            {
+                _service.Delete(id);
+            }
+            catch (InvalidOperationException ex)
+            {
+                TempData["Error"] = ex.Message;
+            }
             return RedirectToAction("Index");
         }
 
