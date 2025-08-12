@@ -1,0 +1,32 @@
+@model IEnumerable<SolforbTest.Domain.ReceiptDocument>
+@{
+    ViewData["Title"] = "Список документов поступления";
+}
+<h2>Список документов поступления</h2>
+<a class="btn btn-primary mb-3" asp-action="Create">Добавить документ</a>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Номер</th>
+            <th>Дата</th>
+            <th>Действия</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.Id</td>
+            <td>@item.Number</td>
+            <td>@item.Date.ToShortDateString()</td>
+            <td>
+                <a class="btn btn-sm btn-warning" asp-action="Edit" asp-route-id="@item.Id">Редактировать</a>
+                <form asp-action="Delete" asp-route-id="@item.Id" method="post" style="display:inline">
+                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Удалить документ?');">Удалить</button>
+                </form>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

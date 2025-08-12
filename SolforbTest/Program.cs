@@ -17,6 +17,9 @@ builder.Services.AddScoped<ResourceService>();
 builder.Services.AddScoped<IMeasurementUnitRepository, MeasurementUnitRepository>();
 builder.Services.AddScoped<IMeasurementUnitFactory, SolforbTest.Factories.MeasurementUnitFactory>();
 builder.Services.AddScoped<MeasurementUnitService>();
+builder.Services.AddScoped<IReceiptDocumentRepository, ReceiptDocumentRepository>();
+builder.Services.AddScoped<IReceiptDocumentFactory, SolforbTest.Factories.ReceiptDocumentFactory>();
+builder.Services.AddScoped<ReceiptDocumentService>();
 
 
 builder.Services.AddControllersWithViews();
